@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <!--The viewport meta tag is used to improve the presentation and behavior of the samples 
+      on iOS devices-->
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no">
+    <title>Query State Info without Map</title>
+
+    <script src="http://js.arcgis.com/3.9/"></script>
+    <script>
+      require([
+        "esri/tasks/query", "esri/tasks/QueryTask",
+        "dojo/dom", "dojo/on", "dojo/domReady!"
+      ], function (Query, QueryTask, dom, on) {
+
+        var queryTask = new QueryTask("http://csslsystem-259:6080/arcgis/rest/services/FFh/MapServer/1");
+                                                                      //This is a sample service. Use your own service in order to get this code working.
+        var query = new Query();
+        query.returnGeometry = false;
+        query.outFields = [
+          "Description","NAME"
+        ];
+
+        on(dom.byId("execute"), "click", execute);
+
+        function execute () {
+		
+		var st=  dom.byId("stateName").value;
+		var res = st.split(" ");
+		//alert(res);
+		
+		var count=res.length;
+		//alert(count);
+		 
+		for(i=0;i<count;i++)
+		{
+		
+          //query.text = dom.byId("stateName").value;
+		  query.text=res[i];
+		  
+          queryTask.execute(query, showResults);
+		}
+        }
+
+        function showResults (results) {
+          var resultItems = [];
+          var resultCount = results.features.length;
+          for (var i = 0; i < resultCount; i++) {
+            var featureAttributes = results.features[i].attributes;
+            for (var attr in featureAttributes) {
+              resultItems.push("<b>" + attr + ":</b>  " + featureAttributes[attr] + "<br>");
+            }
+            resultItems.push("<br>");
+          }
+          dom.byId("info").innerHTML = resultItems.join("");
+        }
+      });
+    </script>
+  </head>
+
+  <body>
+    US state name :
+    <input type="text" id="stateName" value="class">
+    <input id="execute" type="button" value="Get Details">
+    <br />
+    <br />
+    <div id="info" style="padding:5px; margin:5px; background-color:#eee;">
+    </div>
+  </body>
+</html>
